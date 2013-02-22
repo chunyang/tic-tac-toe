@@ -89,6 +89,10 @@ class Board
     b
   end
 
+  def hash
+    return @data.hash
+  end
+
   def to_s
     @data.map do |row|
       ' ' +  row.map { |e| if e.nil? then ' ' else e.to_s end }.join(' | ')
