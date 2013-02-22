@@ -19,6 +19,9 @@ class SimpleAI
     else
       raise ArgumentError, 'Player must be :x or :o'
     end
+
+    @min_memo = {}
+    @max_memo = {}
   end
 
   def make_move
@@ -51,31 +54,39 @@ class SimpleAI
   def min_value(board)
     return utility(board) if board.over?
 
-    moves = board.possible_moves
+    unless @min_memo.include? board
+      moves = board.possible_moves
 
-    values = moves.map do |move|
-      b = board.dup
-      b[*move] = @other_player
+      values = moves.map do |move|
+        b = board.dup
+        b[*move] = @other_player
 
-      max_value(b)
+        max_value(b)
+      end
+
+      @min_memo[board] = values.min
     end
 
-    values.min
+    @min_memo[board]
   end
 
   def max_value(board)
     return utility(board) if board.over?
 
-    moves = board.possible_moves
+    unless @max_memo.include? board
+      moves = board.possible_moves
 
-    values = moves.map do |move|
-      b = board.dup
-      b[*move] = @player
+      values = moves.map do |move|
+        b = board.dup
+        b[*move] = @player
 
-      min_value(b)
+        min_value(b)
+      end
+
+      @max_memo[board] = values.max
     end
 
-    values.max
+    @max_memo[board]
   end
 
   def utility(board)
