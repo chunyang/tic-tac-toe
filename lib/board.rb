@@ -11,6 +11,11 @@ class Board
 
   def []=(y, x, v)
     if v.nil? or (v.respond_to? :to_sym and [:x, :o].include? v.to_sym)
+      if @data[y][x] != v.to_sym
+        @winner = nil
+        @over = false
+      end
+
       @data[y][x] = v.to_sym
     else
       raise ArgumentError, 'Value must be :x, :o, or nil'
@@ -53,7 +58,7 @@ class Board
     end
 
     # Tie game
-    if @data.flatten.none? { |e| e.nil? }
+    if @winner.nil? and @data.flatten.none? { |e| e.nil? }
       @winner = false
       @over = true
     end

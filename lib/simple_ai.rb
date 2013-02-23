@@ -7,9 +7,11 @@ $:.unshift File.dirname(__FILE__)
 require 'board'
 
 class SimpleAI
-  def initialize(board, player)
-    @board = board
+  attr_accessor :debug
+
+  def initialize(player)
     @player = player.to_sym
+    @debug = false
 
     case @player
     when :x
@@ -20,20 +22,18 @@ class SimpleAI
       raise ArgumentError, 'Player must be :x or :o'
     end
 
-    @min_memo = {}
-    @max_memo = {}
   end
 
-  def make_move
-    return false if @board.over?
+  def make_move(board)
+    return false if board.over?
 
-    moves = @board.possible_moves
+    moves = board.possible_moves
 
     best = -1
     best_move = moves.first
 
     moves.each do |move|
-      b = @board.dup
+      b = board.dup
       b[*move] = @player
 
       v = min_value(b)
@@ -44,7 +44,7 @@ class SimpleAI
       end
     end
 
-    @board[*best_move] = @player
+    board[*best_move] = @player
 
     true
   end
@@ -54,39 +54,47 @@ class SimpleAI
   def min_value(board)
     return utility(board) if board.over?
 
-    unless @min_memo.include? board
-      moves = board.possible_moves
+    moves = board.possible_moves
 
-      values = moves.map do |move|
-        b = board.dup
-        b[*move] = @other_player
+    values = moves.map do |move|
+      b = board.dup
+      b[*move] = @other_player
 
-        max_value(b)
-      end
-
-      @min_memo[board] = values.min
+      max_value(b)
     end
 
-    @min_memo[board]
+    if @debug
+      puts board
+      print moves
+      puts
+      print values
+      puts
+    end
+
+    values.min
   end
 
   def max_value(board)
     return utility(board) if board.over?
 
-    unless @max_memo.include? board
-      moves = board.possible_moves
+    moves = board.possible_moves
 
-      values = moves.map do |move|
-        b = board.dup
-        b[*move] = @player
+    values = moves.map do |move|
+      b = board.dup
+      b[*move] = @player
 
-        min_value(b)
-      end
-
-      @max_memo[board] = values.max
+      min_value(b)
     end
 
-    @max_memo[board]
+    if @debug
+      puts board
+      print moves
+      puts
+      print values
+      puts
+    end
+
+    values.max
   end
 
   def utility(board)
